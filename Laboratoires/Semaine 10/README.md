@@ -22,7 +22,7 @@
    DB_USER=CODEPERMANENT
    DB_PASSWORD=VOTREMOTDEPASSE
    DB_HOST=geo7630.c124ic8ew2kc.ca-central-1.rds.amazonaws.com
-   DB_NAME=geo7630
+   DB_NAME=geo7630h26
    ```
 
 4. Dans le dossier **Atlas**, faites un clic droit sur le fichier **docker-compose.yml** et sélectionnez **Compose Up**.

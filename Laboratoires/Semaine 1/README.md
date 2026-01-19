@@ -92,9 +92,13 @@
   ![PostGIS](images/image111.png)
 
   2. Spécifiez la connexion à votre base de données **Amazon**.
+
+  **! N'oubliez pas de changer les informations de host et database avec ceux de l'année en cours !**
   
    `geo7630.c124ic8ew2kc.ca-central-1.rds.amazonaws.com`
 
+   `geo7630h26`
+   
    ![Configurer la connexion PostgreSQL](images/image-21.png)
 
 

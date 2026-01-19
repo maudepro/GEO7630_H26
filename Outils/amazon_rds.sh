@@ -9,7 +9,7 @@ export AWS_REGION="$REGION"
 
 PREFIX="geo7630H26"                # change par session si tu veux
 DB_INSTANCE_ID="${PREFIX}-pg"
-DB_NAME="geo7630"
+DB_NAME="geo7630h26"
 
 DB_ADMIN_USER="geo7630_admin"
 DB_ADMIN_PW="!CHANGE_ME_STRONG_PASSWORD!"  # mets un vrai mot de passe
