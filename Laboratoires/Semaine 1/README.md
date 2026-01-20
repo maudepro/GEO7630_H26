@@ -95,9 +95,9 @@
 
   **! N'oubliez pas de changer les informations de host et database avec ceux de l'année en cours !**
   
-   `geo7630.c124ic8ew2kc.ca-central-1.rds.amazonaws.com`
+   DB_HOST = `geo7630.c124ic8ew2kc.ca-central-1.rds.amazonaws.com`
 
-   `geo7630h26`
+   DB_NAME = `geo7630h26`
    
    ![Configurer la connexion PostgreSQL](images/image-21.png)
 
