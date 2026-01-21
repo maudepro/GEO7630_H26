@@ -48,13 +48,15 @@ $$ LANGUAGE plpgsql;
 
 
 SELECT create_user_and_schema(ARRAY[
-    'BWEF05328104',
-    'CLEA23566605',
-    'DANA81510207',
-    'POUM10029204',
-    'PROM04599804',
-    'ROYA03019503',
-    'TCHC10368707'
+    'ha891140',
+    'kf391972',
+    'ha091004',
+    'ec790898',
+    'cg290808'
+
+
+
+
 ]);
 
 
