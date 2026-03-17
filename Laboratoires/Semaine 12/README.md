@@ -1,159 +1,169 @@
-# Laboratoire cours 11-12
+# 🧪 Lab 11 – Cartographie interactive avec MapLibreGL
+
+Ce laboratoire NE vous guide étape par étape dans la construction d'une **application web de cartographie interactive**.
+
+Il vous donne l'architecture de l'application et vous donne les grandes étapes
+
+---
+
+## 1 Fichiers du laboratoire
+
+- `index.html` : point d’entrée HTML
+- `map-controls.js` : création et configuration de la carte
+- `map-layers.js` : définition des sources et couches
+- `app.js` : chargement dynamique des couches dans la carte
+- `mouse-controls.js` : interactions avec la souris (hover, click)
+
+---
+
+## 1 Étape 1 – Initialisation de la carte
+
+📄 Fichier : `map-controls.js`
+
+Créez un fichier `map-controls.js` et injecter y la carte et les controleurs de carte (var map = new maplibregl.Map , var control = map.NavigationControl(...) etc...)
+- Création de la carte MapLibreGL
+- Définition du fond de carte via MapTiler
+- Ajout des contrôles :
+  - Navigation (zoom + boussole)
+  - Géolocalisation
+  - Échelle
+
+---
+
+##  Étape 2 – Ajout des couches de données
+
+📄 Fichier : `map-layers.js`
+
+
+Créez un fichier `map-layers.js` et créer les layers sous forme de variable objet :
+
+ex :
 
-[**Laboratoire cours 11-12 ****1**](https://docs.google.com/document/d/1RMvJ2OjrlZe3YlsK7rlI5QAY4Ld-JLKV9fnR-8O9oAQ/edit#heading=h.6xp8lo9ezpif)
+```
+// Définition de la source GeoJSON
+var commercesSource = {
+    type: 'geojson',
+    data: 'https://donnees.montreal.ca/dataset/c1d65779-d3cb-44e8-af0a-b9f2c5f7766d/resource/ece728c7-6f2d-4a51-a36d-21cd70e0ddc7/download/businesses.geojson'
+  };
+  
+  // Définition de la couche avec symbologie par type de commerce
+  var commercesLayer = {
+    id: 'commerces',
+    type: 'circle',
+    source: 'commerces_source'
+    etc....
+  };
 
-[**Prérequis : ****1**](https://docs.google.com/document/d/1RMvJ2OjrlZe3YlsK7rlI5QAY4Ld-JLKV9fnR-8O9oAQ/edit#heading=h.ow87l5ef1vz6)
+```
 
-[Objectif du laboratoire 6](https://docs.google.com/document/d/1RMvJ2OjrlZe3YlsK7rlI5QAY4Ld-JLKV9fnR-8O9oAQ/edit#heading=h.s1d1cfdc34oi)
 
-[**Créer et styliser des clusters ****7**](https://docs.google.com/document/d/1RMvJ2OjrlZe3YlsK7rlI5QAY4Ld-JLKV9fnR-8O9oAQ/edit#heading=h.86zhcmbby4fa)
+1. **Commerces** :
+   - Source GeoJSON dynamique depuis Montréal Source GeoJSON via données ouvertes ou pgfeatureserv ou pgtileserv
+   ex : `https://donnees.montreal.ca/dataset/c1d65779-d3cb-44e8-af0a-b9f2c5f7766d/resource/ece728c7-6f2d-4a51-a36d-21cd70e0ddc7/download/businesses.geojson`
+   - Couleur et taille variables selon le `type` de commerce
 
-[**Créer et styliser une carte de chaleur (heatmap) ****9**](https://docs.google.com/document/d/1RMvJ2OjrlZe3YlsK7rlI5QAY4Ld-JLKV9fnR-8O9oAQ/edit#heading=h.t1qmum80efu0)
+Configuration souhaitée :
 
-[Créer et visualiser une couche de polygones extrudées 10](https://docs.google.com/document/d/1RMvJ2OjrlZe3YlsK7rlI5QAY4Ld-JLKV9fnR-8O9oAQ/edit#heading=h.jpcosgmr1kuw)
+```
+ paint: {
+      // Rayon variable selon le type
+      'circle-radius': [
+        'match',
+        ['get', 'type'],
+        'Épicerie', 5,
+        'Pâtisserie/Boulangerie', 7,
+        'Distributrice automatique', 4,
+        'Pharmacie', 6,
+        'Restaurant', 5,
+        3 // taille par défaut
+      ],
+      // Couleur variable selon le type
+      'circle-color': [
+        'match',
+        ['get', 'type'],
+        'Épicerie', 'orange',
+        'Pâtisserie/Boulangerie', 'yellow',
+        'Distributrice automatique', 'blue',
+        'Pharmacie', 'green',
+        'Restaurant', 'purple',
+        'grey' // couleur par défaut
+      ],
+      'circle-stroke-color': '#fff',
+      'circle-stroke-width': 1
+    }
+```
 
+   - Filtrage pour ne garder que ceux au statut `"Ouvert"` (Ajoutez le à la suite du "paint" configuration)
 
-##
+```
+    filter: ['==', ['get', 'statut'], 'Ouvert']
+```
 
-## Prérequis : 
 
-- Ouvrir github
+2. **Arrondissements** :
+   - Source GeoJSON via données ouvertes ou pgfeatureserv ou pgtileserv
+   - Polygones avec contour noir, remplissage semi-transparent
+   - Labels centrés par arrondissement sur la propriété : `nom`
 
-- Ouvrir codespace 
+```
+ layout: {
+      'text-field': ['get', 'nom'], // ou 'nom_offici'
+      'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'],
+      'text-size': 14,
+      'text-anchor': 'center'
+    },
+    paint: {
+      'text-color': '#111',
+      'text-halo-color': '#fff',
+      'text-halo-width': 1.5
+    }
+```
 
-- Faire un git pull
+---
 
-![](https://lh7-us.googleusercontent.com/9hrK7pezwX-pzGLmZk1KeKrhZUb_SgBHdQHds4rMzoltbJVQ6efTsd_e2F9sfO2lJfS7KWsU0oe3WQMkTM81GydJ7ptuw4tGbQ24uHfYUjF-SErZkCS6DURfQLVDUGoRqSZ4yxyCnfj-yNXoDthbCY4)
+## Étape 3 – Chargement des couches dans la carte
 
-- Placez vous sur la branche “lab11”
+📄 Fichier : `app.js`
 
-Pour vérifier sur quelle branche vous êtes : 
+Créez un fichier `app.js` et injecter les layers précédement créer dans le `map-layers.js`
 
-![](https://lh7-us.googleusercontent.com/08sW5PuM3f5kprK6BiJSZK8a7cTKtTNjUDMfit4DM0xV_ZEyGtPS-ejtglOs_mKIPYoVTktMOWSmzThTsstVz5Y8-XX-oyjagnwO4z9cxx9Ji68Y4xA87-5PKcKbgIlBXKD9EHhHawFoHNPlSK-UTA4)
+- Ajout des sources et des couches :
+  - `commerces_source` → `commerces`
+  - `arrondissements-source` → `arrondissements`, `arrondissements-labels`
+---
 
-Pour changer de branche : 
+## Étape 4 – Ajout des interactions souris
 
-![](https://lh7-us.googleusercontent.com/b44W6QobKZpsRNZgY-VKnrzFMCFiLiWPboughrE1N03HxcTdjZ6j_94EWv4t2IzQlSwl66oUuUl9Tuw4D5jpIzQw1gB5ORJQ7KN2GJZhb3InBVBJJYiP_C7YChv3uAW_qHBmRcNj2IUGQoD1hZivhPQ)
+📄 Fichier : `mouse-controls.js`
 
-![](https://lh7-us.googleusercontent.com/ufoUaqK-MNtMK5CgtznmJF5gRDprdICFWjA95PAhAh74dF_2M5kED0IrbHHCEyDm_TgrsQACM1294Ql96j3Q51Jva4uR4DtUaybkw7hpJNcX2dcRI_Sld6lWC4MMuso7Qr-SdvSHCU7Vw5GTBPN8Hdg)
+Créez un fichier `mouse-controls.js` et injecter y les controleurs de souris
 
-Une fois que vous avez basculé il est simple de le savoir
+- Survol (`mouseenter` / `mouseleave`) : changement du curseur
+- Clic sur un commerce :
+  - Affiche une popup (nom + type)
+  - Effectue un zoom et un recentrage (`flyTo`)
 
-![](https://lh7-us.googleusercontent.com/Y8tcMADTDgOKYIyNZseMH4D63QoIntdU579-jLTRDQ5u5pmmUvZ_d8oNFyvLPkn4EEnNw_3Lq2FGXySJkQHyTwQuo5Tw1tdSysi9-qAlNBp2xJTkLL01Zm7xDp-R9nLmW0nsxA_e50W7q4aHSBwK0n4)
+---
 
-Si ce n’est pas déjà fait installer l’extension DOCKER (ctrl+shift+x) ou simplement sur l’icône de blocks sur le côté gauche
+## Étape 5 – Extension possible
 
-Chercher Docker et installer l’extension
+💡 Pistes d’amélioration :
+- Ajouter un sélecteur `<select>` pour filtrer dynamiquement les types de commerces
+- Ajouter des statistiques ou un mini dashboard avec les comptes par arrondissement
+- Créer un panneau latéral dynamique avec les propriétés des entités sélectionnées
 
-![](https://lh7-us.googleusercontent.com/N9yCDW-jAUv0lDcWewiyzcHvlchxCYlRSE5kD1kLb85wJuaBumvlTSI5WkAxmE6hOLTNxXuwOw6D-rkeVLW_3NdPlTR8h1_enu0Mw3CAv8jIFWdIGrairejSznLbfH5m2EY79vWzFinH0csbwvv9meY)
+---
 
-!! Avant de lancer les containers applicatifs, assurez vous d’avoir copier coller le fichier .env.example , de remplir les variables d’environnement et de renommer le fichier en .env
+## Résultat attendu
 
-![](https://lh7-us.googleusercontent.com/d880WbvMICx_3se8ET9EqyUCQhPJgDdbqDjNn-d6_QORpA3YhbS6VJeSlooBEeRnWQq1BeqpGLhMpIyWH5lx0JoJJarvl0tIvmYOkwBeyLe_CGa4--jKSd4RSOmvyxU2YaqY7EkpqqskPwOxBYrLIoU)
+![alt text](images/image2.png)
 
-Monter les containers avec Docker compose up
+Une carte interactive centrée sur Montréal :
 
-Faites un clic droit sur le ficher .yaml et choisissez compose up
+- Affiche les commerces filtrés et stylisés
+- Montre les arrondissements nommés
+- Offre une interaction fluide à la souris et un popup lorsqu'on clique sur un commerces
+![alt text](images/image3.png)
+---
 
-![](https://lh7-us.googleusercontent.com/_fyTBG6ks_M5d7seP2WWhqMSXSY-3yv_U67Zw7NGG7r8nrs_rahGDdPE-de3yG7yzee8VLR4DfpSIgdAe_1XoUR3263whXdf1P2bEhFMVhpM7z1THu1HAT8V-jVEVxFcsVKFAbiAtSqTPeEAO4nIk-8)
-
-Vérifier que vous avez accès à la page web de l’Atlas en vous assurant que les containers soit tous au vert (sinon relancer les avec un clic droit Start ou Restart)
-
-![](https://lh7-us.googleusercontent.com/fGO5_ORaqjd96iJFvVko84v1lilw1mpu7LJnpTNGzAZnD8CK-hNdlauUVen5X_7hYi89zuYYI7aTbzoMzw1l6h5ce9Akgh4xlZKvseVjyfSvKmt4YAlpwcXXy-LYhMVdvQ3LVaC8-X5NZUwbVHfvNSM)
-
-Cela devrait ouvrir un nouvel onglet avec l’atlas
-
-
-## ![](https://lh7-us.googleusercontent.com/lU4mGX-EZ3Y-9pULQMf-X5i5GjRkPtD2JyYSagmeedqAPhLPNOqms6lRCpuCI_nt6zT5T7MOudo6hc7imIeteGkP0ye2uDKoTnqRMW4S5IAtV2Zg0Q23O-7LcfUecJTatwPiwvZfcJFkVMZZx256ENQ)
-
-### Objectif du laboratoire
-
-Ici le but du laboratoire est de vous familiariser avec les outils de développement (VS Code) et l’API Maplibre pour injecter des modules javascript de visualisation et de contrôle avancés de cartographie web. Avec les 2 derniers laboratoires vous avez donc pris en main ces outils, ici je ne fournirais pas de tutoriel exhaustif mais plutôt les grandes lignes des choses à faire pour que vous puissiez tester vous même votre montée en compétence.
-
-
-###
-
-## Créer et styliser des clusters
-
-Documentation : [Create and style clusters](https://maplibre.org/maplibre-gl-js/docs/examples/cluster/)
-
-1. Créez un nouveau module javascript \`renderClusters.js\` à la racine du dossier lab 11 
-
-2. Dans ce module ajoutez une nouvelle fonction :
-
-   1.  **\`function generateClusters() {}\`**
-
-3. Dans la fonction commencez par nettoyer les layers existants avec la fonctionnalité vu en classe : 
-
-   1. **\`removeAllLayersAndSources()\`**
-
-4. Dans le module renderClusters.js  ajoutez une nouvelle source geojson qui comprend la propriété **\`CLUSTER:TRUE\`** comme dans la documentation maplibre ci haut.
-
-5. La propriété **\`data\`** dans la configuration **addLayer** doit référer à la variable **\`randomPoints\`** du module javascript **\`randomPoints.js\`**
-
-   1. ****![](https://lh7-us.googleusercontent.com/FC-rGQJjcQTuyxNlZmdXhpUqpdoLo4-trMKfNU-6y1unzoOjY1T_9UsLFaNmft5SJce5W4mkhk_KdR8s0OKIqyOVR1I09NWJQqj5XCz3uUteLEao2UpPtty1TxhAYhpMUEKEFSYTZk-HZDh9ROSsZfo)****
-
-6. Une fois terminé, ajoutez l’écouteur d'événement pour exécuter cette fonction lors du clic sur le bouton comme vu en classe
-
-   1. document
-
-   2.   .getElementById('generateClusters') // id unique du bouton
-
-   3.   .addEventListener('click', generateClusters); // ajoute un event de type click qui lance la fonction generateClusters()
-
-   4.
-
-7. Le **\<button>** id du bouton se nomme : **\`'generateClusters'\`**
-
-8. N’oubliez pas d’ajouter la source du module javascript dans le fichier html **index.html**
-   9. Emplacement du module à mettre dans le fichier html : ./modules/lab11/renderClusters.js
-
-![](https://lh7-us.googleusercontent.com/XOeK_u2rykBVa4gQSGvliXKpbRWz695z-T81T2FgvRd9qV_Rkc7wajqH_yx5h3qHEvhbMsLqY0rIylA00AjZ8T4UnUh1CwechKCDL1w5YMgkAJQczrGkNkw9PXAkiy01MdF__LukvHv9uQFhGQyB-_g)
-
-
-##
-
-## Créer et styliser une carte de chaleur (heatmap)
-
-Documentation : [Create a heatmap layer - MapLibre GL JS](https://maplibre.org/maplibre-gl-js/docs/examples/heatmap-layer/)
-
-1. Créez un nouveau module javascript **\`renderHeatmap.js\`**
-
-2. Ajoutez une source et un layer de type **heatmap**, suivez l’exemple Maplibre
-
-3. La propriété **\`data\`** dans la configuration **addLayer** doit référer à la variable **\`randomPoints\`** du module javascript **\`randomPoints.js\`**
-
-4. N’oubliez pas d’ajouter la **source du module** dans le index.html
-
-![](https://lh7-us.googleusercontent.com/XA4o1TyKks1QbXwoQP6pu8suTiNjoY5Edqy5YqcnU5b30xp4XALceX1mkAvn1C5XILda1TqzzCWEtg3g6OmaMuWADm_eizsM1cajhFLsvshLtPGG4wNlB7SZYPdOU9QusLvOUGsJKtCH9-nL5oss4Yk)
-
-
-## Créer et visualiser une couche de polygones extrudées
-
-Documentation : [Display buildings in 3D - MapLibre GL JS](https://maplibre.org/maplibre-gl-js/docs/examples/3d-buildings/)
-
-1. Créez un nouveau module javascript **\`render3D.js\`**
-
-2. Créez une fonction **\`function generate3D()\`**
-
-3. Ajoutez y une variable pour fabriquer un grid hexagonal : 
-
-   1. **var grid = makeGrid();** 
-
-   2. Cette **variable** appelle une fonction du module javascript dans le fichier **\`createGrid.js\`** vous pouvez aller la voir si vous êtes curieux
-
-4. Ajoutez une source de type geojson dont le data est **\`grid\`** 
-
-   1. (qui réfère à la variable précédente)
-
-5.  Maintenant ajouter un layer de type **\`fill-extrusion\`**
-
-   1. Inspirez vous de l’exemple Maplibre ci-haut
-
-6. La propriété **\`fill-extrusion-color\`** et **\`fill-extrusion-height\`** que vous devez utiliser est “randomValue” (qui est générée par le module createGrid.js)
-
-7. N’oubliez pas d’ajouter la **source du module** dans index.html
-
-![](https://lh7-us.googleusercontent.com/C2eWrfMpdF6d0-NZFXOPLMzonCksaDJy3-FQE21wR14rxzSbCyyybBimODm_ISDtt0wIpZA-6juKeFkt-47rQ9eWZ3t6fIagy2z3mQDH_StZdunzA7uqAANUiFaCeha_xS661JxWlokuGNclTItnfl4)
-
-Beau travail ! Vous venez de réaliser votre première application d’analyse spatiale sur le Web ! 💪
+> Ce laboratoire renforce vos compétences en structuration de projet web carto, en gestion des couches et en interaction utilisateur via MapLibreGL.

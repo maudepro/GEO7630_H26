@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GEO7630 — Web Mapping de base</title>
+
+  <link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet" />
+  <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+
+  <style>
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: Arial, Helvetica, sans-serif;
+      color: #1f2937;
+      background: #f3f4f6;
+    }
+
+    body {
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      min-height: 100vh;
+    }
+
+    header {
+      padding: 1rem 1.25rem;
+      background: white;
+      border-bottom: 1px solid #d1d5db;
+    }
+
+    h1 {
+      margin: 0 0 0.35rem 0;
+      font-size: 1.5rem;
+    }
+
+    .subtitle {
+      margin: 0;
+      color: #4b5563;
+      font-size: 0.95rem;
+      line-height: 1.4;
+    }
+
+    main {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      min-height: 0;
+    }
+
+    .panel {
+      background: white;
+      border-right: 1px solid #d1d5db;
+      padding: 1rem;
+      overflow: auto;
+    }
+
+    .panel h2 {
+      font-size: 1rem;
+      margin-top: 0;
+    }
+
+    .control-group { margin-bottom: 1rem; }
+
+    label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 0.4rem;
+    }
+
+    select, button {
+      width: 100%;
+      padding: 0.7rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      background: white;
+    }
+
+    button {
+      cursor: pointer;
+      background: #111827;
+      color: white;
+      border: none;
+    }
+
+    button:hover { opacity: 0.92; }
+
+    .note {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 0.85rem;
+      font-size: 0.92rem;
+      line-height: 1.5;
+      color: #374151;
+    }
+
+    #map {
+      width: 100%;
+      height: 100%;
+      min-height: 500px;
+    }
+
+    footer {
+      padding: 0.75rem 1.25rem;
+      background: white;
+      border-top: 1px solid #d1d5db;
+      color: #4b5563;
+      font-size: 0.9rem;
+    }
+
+    .legend {
+      margin-top: 1rem;
+      padding: 0.75rem;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      background: #fafafa;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+      font-size: 0.92rem;
+    }
+
+    .legend-color {
+      width: 14px;
+      height: 14px;
+      border-radius: 3px;
+      border: 1px solid rgba(0,0,0,0.15);
+      flex-shrink: 0;
+    }
+
+    code {
+      background: #f3f4f6;
+      padding: 0.1rem 0.3rem;
+      border-radius: 4px;
+    }
+
+    @media (max-width: 900px) {
+      main {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto 1fr;
+      }
+
+      .panel {
+        border-right: none;
+        border-bottom: 1px solid #d1d5db;
+      }
+
+      #map { min-height: 60vh; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Carte web — Exemple complet à déconstruire</h1>
+    <p class="subtitle">
+      Objectifs : afficher une carte, ajouter un titre, charger un GeoJSON local,
+      styliser selon un attribut, ajouter un filtre, puis publier.
+    </p>
+  </header>
+
+  <main>
+    <aside class="panel">
+      <h2>Contrôles</h2>
+
+      <div class="control-group">
+        <label for="categoryFilter">Filtrer par catégorie</label>
+        <select id="categoryFilter">
+          <option value="all">Toutes les catégories</option>
+        </select>
+      </div>
+
+      <div class="control-group">
+        <button id="zoomToDataBtn">Zoom sur les données</button>
+      </div>
+
+      <div class="note">
+        <strong>Fichier attendu :</strong><br />
+        <code>./data/territoires.geojson</code><br /><br />
+        Le GeoJSON doit idéalement contenir un attribut
+        <code>category</code> pour le style et le filtre,
+        ainsi qu’un attribut <code>name</code> pour le popup.
+        <br /><br />
+        Si le fichier n’est pas trouvé, un jeu de données de démonstration
+        sera utilisé automatiquement.
+      </div>
+
+      <div class="legend" id="legend">
+        <strong>Légende</strong>
+        <div id="legendItems"></div>
+      </div>
+
+      <div class="note" style="margin-top: 1rem;">
+        <strong>Publier :</strong><br />
+        1. Déposer ce fichier comme <code>index.html</code><br />
+        2. Ajouter le dossier <code>data/</code><br />
+        3. Publier sur GitHub Pages, Netlify ou Vercel
+      </div>
+    </aside>
+
+    <section id="map"></section>
+  </main>
+
+  <footer>
+    GEO7630 — Exemple final volontairement simple pour être déconstruit étape par étape.
+  </footer>
+
+  <script>
+    const BASEMAP_STYLE = "https://tiles.openfreemap.org/styles/liberty";
+    const LOCAL_GEOJSON_PATH = "https://donnees.montreal.ca/dataset/5829b5b0-ea6f-476f-be94-bc2b8797769a/resource/aacc4576-97b3-4d8d-883d-22bbca41dbe6/download/actes-criminels.geojsonhttps://donnees.montreal.ca/dataset/2df0fa28-7a7b-46c6-912f-93b215bd201e/resource/d02dac7d-a114-4113-8e52-266001447591/download/collecte-des-matieres-recyclables.geojson";
+
+    const SOURCE_ID = "territoires-source";
+    const FILL_LAYER_ID = "territoires-fill";
+    const OUTLINE_LAYER_ID = "territoires-outline";
+
+    const categoryColors = {
+      "Parc": "#22c55e",
+      "Eau": "#3b82f6",
+      "Résidentiel": "#f59e0b",
+      "Institutionnel": "#8b5cf6",
+      "Autre": "#6b7280"
+    };
+
+    const fallbackGeoJSON = {
+      "type": "FeatureCollection",
+      "features": [
+        {
+          "type": "Feature",
+          "properties": {
+            "name": "Parc exemple",
+            "category": "Parc"
+          },
+          "geometry": {
+            "type": "Polygon",
+            "coordinates": [[
+              [-73.622, 45.516],
+              [-73.612, 45.516],
+              [-73.612, 45.523],
+              [-73.622, 45.523],
+              [-73.622, 45.516]
+            ]]
+          }
+        },
+        {
+          "type": "Feature",
+          "properties": {
+            "name": "Zone résidentielle",
+            "category": "Résidentiel"
+          },
+          "geometry": {
+            "type": "Polygon",
+            "coordinates": [[
+              [-73.606, 45.514],
+              [-73.595, 45.514],
+              [-73.595, 45.522],
+              [-73.606, 45.522],
+              [-73.606, 45.514]
+            ]]
+          }
+        },
+        {
+          "type": "Feature",
+          "properties": {
+            "name": "Bassin urbain",
+            "category": "Eau"
+          },
+          "geometry": {
+            "type": "Polygon",
+            "coordinates": [[
+              [-73.617, 45.507],
+              [-73.607, 45.507],
+              [-73.607, 45.512],
+              [-73.617, 45.512],
+              [-73.617, 45.507]
+            ]]
+          }
+        }
+      ]
+    };
+
+    const map = new maplibregl.Map({
+      container: "map",
+      style: BASEMAP_STYLE,
+      center: [-73.57, 45.52],
+      zoom: 11
+    });
+
+    map.addControl(new maplibregl.NavigationControl(), "top-right");
+
+    function getUniqueCategories(geojson) {
+      const values = geojson.features.map(feature => feature.properties?.category || "Autre");
+      return [...new Set(values)].sort();
+    }
+
+    function buildMatchExpression(categories) {
+      const expression = ["match", ["coalesce", ["get", "category"], "Autre"]];
+
+      categories.forEach(category => {
+        expression.push(category);
+        expression.push(categoryColors[category] || categoryColors["Autre"]);
+      });
+
+      expression.push(categoryColors["Autre"]);
+      return expression;
+    }
+
+    function populateFilter(categories) {
+      const select = document.getElementById("categoryFilter");
+
+      categories.forEach(category => {
+        const option = document.createElement("option");
+        option.value = category;
+        option.textContent = category;
+        select.appendChild(option);
+      });
+    }
+
+    function populateLegend(categories) {
+      const legendItems = document.getElementById("legendItems");
+      legendItems.innerHTML = "";
+
+      categories.forEach(category => {
+        const item = document.createElement("div");
+        item.className = "legend-item";
+
+        const swatch = document.createElement("span");
+        swatch.className = "legend-color";
+        swatch.style.backgroundColor = categoryColors[category] || categoryColors["Autre"];
+
+        const label = document.createElement("span");
+        label.textContent = category;
+
+        item.appendChild(swatch);
+        item.appendChild(label);
+        legendItems.appendChild(item);
+      });
+    }
+
+    function getBoundsFromGeoJSON(geojson) {
+      const bounds = new maplibregl.LngLatBounds();
+
+      geojson.features.forEach(feature => {
+        const geom = feature.geometry;
+        if (!geom) return;
+
+        if (geom.type === "Point") {
+          bounds.extend(geom.coordinates);
+        }
+
+        if (geom.type === "MultiPoint" || geom.type === "LineString") {
+          geom.coordinates.forEach(coord => bounds.extend(coord));
+        }
+
+        if (geom.type === "MultiLineString" || geom.type === "Polygon") {
+          geom.coordinates.flat().forEach(coord => bounds.extend(coord));
+        }
+
+        if (geom.type === "MultiPolygon") {
+          geom.coordinates.flat(2).forEach(coord => bounds.extend(coord));
+        }
+      });
+
+      return bounds;
+    }
+
+    function applyFilter(selectedCategory) {
+      if (selectedCategory === "all") {
+        map.setFilter(FILL_LAYER_ID, null);
+        map.setFilter(OUTLINE_LAYER_ID, null);
+      } else {
+        const filterExpression = ["==", ["coalesce", ["get", "category"], "Autre"], selectedCategory];
+        map.setFilter(FILL_LAYER_ID, filterExpression);
+        map.setFilter(OUTLINE_LAYER_ID, filterExpression);
+      }
+    }
+
+    async function loadGeoJSON() {
+      try {
+        const response = await fetch(LOCAL_GEOJSON_PATH);
+
+        if (!response.ok) {
+          throw new Error("Impossible de charger le GeoJSON local.");
+        }
+
+        const geojson = await response.json();
+        console.log("GeoJSON local chargé :", geojson);
+        return geojson;
+      } catch (error) {
+        console.warn("Fichier local introuvable. Utilisation du jeu de démonstration.", error);
+        return fallbackGeoJSON;
+      }
+    }
+
+    async function initializeData() {
+      const geojson = await loadGeoJSON();
+      const categories = getUniqueCategories(geojson);
+      const fillColorExpression = buildMatchExpression(categories);
+
+      populateFilter(categories);
+      populateLegend(categories);
+
+      map.addSource(SOURCE_ID, {
+        type: "geojson",
+        data: geojson
+      });
+
+      map.addLayer({
+        id: FILL_LAYER_ID,
+        type: "fill",
+        source: SOURCE_ID,
+        paint: {
+          "fill-color": fillColorExpression,
+          "fill-opacity": 0.65
+        }
+      });
+
+      map.addLayer({
+        id: OUTLINE_LAYER_ID,
+        type: "line",
+        source: SOURCE_ID,
+        paint: {
+          "line-color": "#1f2937",
+          "line-width": 1.2
+        }
+      });
+
+      map.on("click", FILL_LAYER_ID, (event) => {
+        const feature = event.features?.[0];
+        if (!feature) return;
+
+        const coordinates = event.lngLat;
+        const name = feature.properties?.name || "Sans nom";
+        const category = feature.properties?.category || "Autre";
+
+        new maplibregl.Popup()
+          .setLngLat(coordinates)
+          .setHTML("<strong>" + name + "</strong><br />Catégorie : " + category)
+          .addTo(map);
+      });
+
+      map.on("mouseenter", FILL_LAYER_ID, () => {
+        map.getCanvas().style.cursor = "pointer";
+      });
+
+      map.on("mouseleave", FILL_LAYER_ID, () => {
+        map.getCanvas().style.cursor = "";
+      });
+
+      const bounds = getBoundsFromGeoJSON(geojson);
+      if (!bounds.isEmpty()) {
+        map.fitBounds(bounds, { padding: 40, duration: 0 });
+      }
+
+      document.getElementById("zoomToDataBtn").addEventListener("click", () => {
+        const updatedBounds = getBoundsFromGeoJSON(geojson);
+        if (!updatedBounds.isEmpty()) {
+          map.fitBounds(updatedBounds, { padding: 40 });
+        }
+      });
+
+      document.getElementById("categoryFilter").addEventListener("change", (event) => {
+        applyFilter(event.target.value);
+      });
+    }
+
+    map.on("load", () => {
+      initializeData();
+    });
+  </script>
+</body>
+</html>

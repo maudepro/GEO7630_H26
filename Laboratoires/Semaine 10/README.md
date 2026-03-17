@@ -1,289 +1,234 @@
-# Laboratoire 10 - geo7630h26
-## Configuration Geoserver et mise en place de services VTS et WFS
+# 🛰 Laboratoire 9 : Webmapping Open Source et interaction avec MapLibreGL
 
-### **Étape 1 : Configuration et lancement d’une instance de Geoserver**
+## 🛠 Prérequis
 
-1. Ouvrez GitHub et assurez-vous d’être connecté
-2. Lancez un Codespace à partir de votre fork du dépot github du cours (sur la branche main le codespace).
-3. Cela démarre un environnement virtuel où vous pourrez modifier et tester du code, ainsi que démarrer des services cartographiques.
+✅ Visual Studio installé et configuré.
+
+✅ Compte GitHub connecté à Visual Studio.
+
+✅ Navigateur Web supportant les technologies modernes (Chrome, Firefox, Edge).
+
+## 📋 Objectifs du laboratoire
+
+Ce laboratoire vous permettra d’explorer le webmapping open source à travers MapLibreGL, une librairie JavaScript permettant d’afficher des cartes interactives. Vous apprendrez à :
+
+- Modifier les coordonnées de départ de l’application.
+
+- Modifier la couleur des polygones.
+
+- Créer une fonction pour générer des couleurs aléatoires.
+
+- Assigner des couleurs thématiques en fonction des attributs.
+
+- Ajouter une couche d’étiquettes.
+
+- Utiliser GitHub pour versionner votre code.
+
+## 🗂 Clonage du projet
+
+Cloner le repository GitHub en utilisant Visual Studio ou la ligne de commande :
+
+`git clone https://github.com/Captain-Oski/GEO7630_H25`
+
+Créez ensuite une branche personnelle pour vos modifications.
+
+`git checkout -b votre_nom-labo9`
+
+## 🌍 Chargement de l'application
+
+Accédez au répertoire du laboratoire 9.
 
 ![alt text](images/image.png)
 
+Ouvrez le fichier index.html et vérifiez que l’application charge correctement.
+
 ![alt text](images/image-1.png)
----
 
-### **Étape 2 : Configuration de l’environnement**
 
-1. Copiez-collez le fichier **.env.example** situé dans le dossier **Atlas** (dans le même dossier).
-2. Renommez le fichier en **.env** (supprimez le **.example**).
-3. Modifiez les variables d’environnement avec vos informations personnelles :
+## Modification du code
 
-   ```plaintext
-   DB_USER=CODEPERMANENT
-   DB_PASSWORD=VOTREMOTDEPASSE
-   DB_HOST=geo7630.c124ic8ew2kc.ca-central-1.rds.amazonaws.com
-   DB_NAME=geo7630h26
-   ```
+### 1.1 Modifier les coordonnées de départ
 
-4. Dans le dossier **Atlas**, faites un clic droit sur le fichier **docker-compose.yml** et sélectionnez **Compose Up**.
+Dans le fichier lab9.js, localisez et modifiez les coordonnées et le niveau de zoom par défaut :
+
+`[-73.55, 45.55]`  // Coordonnées originales
+
+Changez-les par d'autres valeurs et sauvegardez.
+
+Testez votre modification en rechargeant (F5) la page web.
 
 ![alt text](images/image-2.png)
 
-5. Si l’option **Compose Up** n’apparaît pas, installez l’extension **Docker**. (Ctrl+shift+x cherchez Docker)
+### 1.2 Ajout du GeoJSON 
 
-![alt text](images/image-3.png)
-
-6. Vérifiez que les conteneurs s’exécutent correctement en consultant l’icône de la baleine Docker.
+Avec le bouton déjà préparé, ajoutez le fichier GeoJSON
 
 ![alt text](images/image-4.png)
 
-7. Ouvrez un terminal (**CTRL+J**) et testez l’application en accédant à son interface web.
+Les polygones sont bien chargés, mais avec une symbologie par défaut.
 
----
+### 2. Modifier la couleur des polygones
 
-### **Étape 3 : Ajout de contrôles de carte**
+Dans la fonction colorPolygons() (ligne 96) du fichier .js , changez :
 
-Dans le fichier **/Atlas/app/app.js**, ajoutez les contrôles suivants :
+`'color': 'red'`
 
-- **Contrôle de navigation** :
-  ```javascript
-  var nav = new maplibregl.NavigationControl({
-      showCompass: true,
-      showZoom: true,
-      visualizePitch: true
-  });
-  map.addControl(nav, 'top-right');
-  ```
-- **Contrôle de géolocalisation** :
-  ```javascript
-  var geolocateControl = new maplibregl.GeolocateControl({
-      positionOptions: { enableHighAccuracy: true },
-      trackUserLocation: true
-  });
-  map.addControl(geolocateControl, 'bottom-right');
-  ```
-- **Contrôle d’échelle** :
-  ```javascript
-  var scale = new maplibregl.ScaleControl({ unit: 'metric' });
-  map.addControl(scale);
-  ```
-Rechargez la page pour voir les contrôleurs s’afficher.
+par :
+
+`'color': '#9f40ff'` (notation Hexadécimale des couleurs)
+
+#### Testez avec le bouton Colorier.
 
 ![alt text](images/image-5.png)
 
-Voici tous les différents Markers and Controls pour votre carte 
+### 3. Créer une fonction de couleur aléatoire
 
-https://maplibre.org/maplibre-gl-js/docs/API/#markers-and-controls
+Créez un nouveau fichier randomColor.js et insérez le code suivant :
 
-
----
-
-### **Étape 4 : Chargement de données depuis un serveur de tuiles vectorielles**
-
-#### 1. 
-
-
-Une source de tuiles vectorielles est définie par une URL qui suit le schéma {z}/{x}/{y}.pbf, où :
-- z représente le niveau de zoom
-- x et y représentent les coordonnées de la tuile
-- ! Attention la source doit être déclarée avant d’ajouter une couche qui l’utilise.
-
-#### 1. Accédez à l’interface d’administration du serveur de tuiles (par exemple pg_tileserv).
-#### 2. Recherchez le service de tuiles vectorielles correspondant à votre couche.
-1. Cliquez sur JSON
-![alt text](image.png)
-2. Repérez l'url en bas et n'oubliez pas de changer le début de l'adresse du serveur pour votre adresse e.g : `special-train-gv4r9g5gj4cvp7`
-![alt text](image-1.png)
-
-#### 3. Copiez l’URL du service et remplacez-la dans le script.
-
-#### 4. Utilisation du source-layer
-
-Le source-layer correspond au nom de la couche à afficher à partir du service de tuiles.
-Il est essentiel d’utiliser le bon nom, qui est défini dans la configuration du serveur de tuiles.
-- Voir la propriété name du .json du service
-
-![alt text](image-3.png)
-
-Vous pouvez maintenant : 
-#### 5. Ajoutez la méthode **map.onLoad()** dans **app.js** :
-- Pour plus d'information assurez-vous de voir la documentation du code dans app.js
-
-```javascript
-map.on('load', function () {
-    map.addSource('NOM UNIQUE QUE VOUS SOUHAITEZ DONNER À VOTRE SOURCE', {
-        type: 'vector',
-        tiles: ['https://your-server-url/PROPRIÉTÉ IS DE LA SOURCE.JSON/{z}/{x}/{y}.pbf']
-    });
-    map.addLayer({
-        'id': 'IDENTIFIANT UNIQUE DU LAYER QUE VOUS SOUHAITEZ DONNER ',
-        'type': 'fill',
-        'source': 'NOM QUE VOUS AVEZ DONNÉ À VOTRE SOURCE',
-        'source-layer': 'PROPRIÉTÉ IS DE LA SOURCE.JSON'
-    });
-});
 ```
-
-Exemple : 
-
-```javascript
-map.on('load', function () {
-    map.addSource('qt_arbres_quartier_source', {
-        type: 'vector',
-        tiles: ['https://special-train-gv4r9g5gj4cvp7-8801.app.github.dev/public.densite_arbres_quartiers/{z}/{x}/{y}.pbf']
-    });
-    map.addLayer({
-        'id': 'qt_arbres_quartier',
-        'type': 'fill',
-        'source': 'qt_arbres_quartier_source',
-        'source-layer': 'public.densite_arbres_quartiers'
-    });
-});
-```
-
-#### 6. Rechargez la carte pour voir les données s'afficher.
-
-Vérification et dépannage
-
-Si les tuiles ne s’affichent pas :
-- Vérifiez que le service de tuiles est bien public et accessible.
-![alt text](images/image-14.png)
-![alt text](images/image-13.png)
-- Assurez-vous que l’URL utilisée est correcte.
-- Ouvrez la console du navigateur (F12 > Console) pour vérifier s’il y a des erreurs.
-- Testez l’URL dans un navigateur pour voir si les tuiles sont bien générées.
-
-![alt text](image-6.png)
----
-
-### **Étape 5 : Stylisation**
-
-Ajoutez une propriété **paint** pour modifier le rendu :
-! Attention les propriétés du layer sont séparées par des virgules.
-
-```javascript
-'paint': {
-    'fill-color': '#FF0000',
-    'fill-opacity': 0.5
+function randomColor() {
+  var r = Math.floor(Math.random() * 256);
+  var g = Math.floor(Math.random() * 256);
+  var b = Math.floor(Math.random() * 256);
+  return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
 }
 ```
 
-![alt text](image-5.png)
----
+Ajoutez-le dans index.html :
 
-### **Étape 6 : Style avancé**
+`<script type='text/javascript' src='./randomColor.js'></script>`
 
-Appliquez un style basé sur une interpolation linéaire de la propriété `qt_arbres`:
+### 4. Appliquer une couleur aléatoire aux polygones
 
-```javascript
-'paint': {
+Modifiez la fonction colorPolygons() pour utiliser randomColor() à la place de la couleur codé en dur :
+
+` 'color': randomColor() `
+
+#### Rechargez la page et testez.
+
+![alt text](images/image-7.png)
+![alt text](images/image-6.png)
+
+### 5. Ajouter une coloration thématique
+
+Remplacez **randomColor()** par une symbologie thématique basé sur l’attribut `operator_id` :
+
+```
+{
+  property: 'operator_id',
+  stops: [
+    [2, randomColor()],
+    [3, randomColor()],
+    [15, randomColor()],
+    [20, randomColor()],
+    [25, randomColor()],
+    [30, randomColor()]
+  ]
+ }
+```
+
+En MapLibreGL, cet extrait de code est utilisé pour définir une règle de style conditionnelle basée sur la propriété `operator_id` d’un ensemble de données géospatiales (comme un GeoJSON ou une couche de tuiles vectorielles).
+
+#### Explication du code
+
+- 1️⃣ property: 'operator_id'
+👉 Indique que la couleur sera déterminée en fonction de l’attribut `operator_id` des entités dans la couche, mais cela pourrait être n'importe quel attribut.
+Chaque entité possède une valeur spécifique pour `operator_id` qui sera comparée aux valeurs des stops.
+
+- 2️⃣ stops: [...]
+👉 Définit une échelle de correspondance entre les valeurs de `operator_id` et des couleurs aléatoires.
+
+Chaque élément de stops est une paire dans un tableau : **[valeur, couleur]** :
+
+Si operator_id == 2, la couleur sera randomColor().
+Si operator_id == 3, la couleur sera randomColor().
+Si operator_id == 15, la couleur sera randomColor()
+…etc.
+
+- 3️⃣ randomColor()
+👉 Appelle une fonction générant une couleur aléatoire en hexadécimal (#RRGGBB).
+Chaque valeur de `operator_id` recevra une couleur différente à **chaque rechargement**.
+
+### 6. Utilisation dans un style MapLibreGL
+Ce type de paramètre est souvent utilisé dans la propriété fill-color d’un layer de type `fill` pour colorier des polygones en fonction de l’attribut `operator_id` :
+
+```
+map.addLayer({
+  'id': 'garages-layer',
+  'type': 'fill',
+  'source': 'geojson-source',
+  'paint': {
     'fill-color': [
-        'interpolate',
-        ['linear'],
-        ['get', 'qt_arbres'],
-        0, 'rgb(255, 255, 255)',
-        100, 'rgba(192, 192, 255, 0.64)',
-        1000, 'rgba(46, 46, 255, 0.58)',
-        5000, 'rgba(68, 0, 255, 0.66)',
-        7000, 'rgba(19, 0, 70, 0.66)'
+      'match',
+      ['get', 'operator_id'], 
+      2, randomColor(),
+      3, randomColor(),
+      15, randomColor(),
+      20, randomColor(),
+      25, randomColor(),
+      30, randomColor(),
+      '#000000' // Couleur par défaut si aucune correspondance
     ],
-    'fill-opacity': 0.7
-}
-```
-![alt text](image-4.png)
-
----
-
-### **Étape 7 : Ajout d’une couche WFS**
-
-0. Utilisez FME pour charger les limites d'arrondissements dans votre schéma de bases de données (nommer la table aussi simplement que `arrondissements`)
-
-Ensuite
-
-1. **Rendez le port 9000 (pg_featureserv) public** pour trouver et copier l'URL du service WFS des arrondissements (comme vu en cours)
-
-![alt text](image-7.png)
-
-2. Ajoutez une fonction **loadWFS()** dans **app.js** :
-
-```javascript
-/**
- * Fonction qui génère une couleur aléatoire en format hexadécimal.
- * @returns {string} Couleur générée au format hexadécimal.
- */
-function getRandomColor() {
-    // Définition des caractères hexadécimaux possibles
-    var letters = '0123456789ABCDEF';
-    // Initialisation de la couleur avec le préfixe hexadécimal (#)
-    var color = '#';
-    // Boucle pour générer chaque caractère de la couleur (6 caractères)
-    for (var i = 0; i < 6; i++) {
-        // Sélection aléatoire d'un caractère hexadécimal
-        color += letters[Math.floor(Math.random() * 16)];
-    }
-    // Retourne la couleur générée au format hexadécimal
-    return color;
-}
-
-/**
- * Fonction qui charge une couche WFS depuis pgFeatureServ et l'ajoute à la carte MapLibre.
- * Cette fonction ajoute une source de données GeoJSON à partir d'une URL pgFeatureServ
- * et ajoute une couche de remplissage ('fill') à la carte MapLibre en utilisant cette source de données.
- */
-function loadWFS() {
-    // Ajout de la source de données des arrondissements depuis pgFeatureServ
-    map.addSource('arrondissements-source', {
-        type: 'geojson', // Type de source de données
-        data: 'UNE URL GeoJSON qui fini par .json' // URL pgFeatureServ GeoJSON ! Attention il faut bien inclure la méthode qui fait la requete sans limite d'items de données
-    });
-
-    // Ajout de la couche des arrondissements à la carte MapLibre
-    map.addLayer({
-        'id': 'arrondissements', // Identifiant de la couche
-        'type': 'fill', // Type de géométrie de la couche (remplissage)
-        'source': 'arrondissements-source', // Source des données de la couche
-        'paint': {
-            'fill-outline-color': 'black',
-            'fill-color': getRandomColor(), // Si la condition est vraie, utilisez une couleur aléatoire
-            'fill-opacity': 0.3 // Opacité de remplissage (30%)
-        }
-    });
-}
-```
-exemple de map.addSource pour pg_featureServ
-```
- map.addSource('arrondissements-source', {
-        type: 'geojson', // Type de source de données
-        data: 'https://special-train-gv4r9g5gj4cvp7-9000.app.github.dev/collections/public.arrondissements/items?limit=5000' // URL pgFeatureServ GeoJSON ! Attention il faut bien inclure la méthode qui fait la requete sans limite d'items de données
-    });
+    'fill-opacity': 0.8
+  }
+});
 ```
 
-3. **Ajoutez un bouton HTML** pour déclencher la fonction :
+### Explication du match dans MapLibreGL :
 
-```html
-<div class='map-overlay top' >
-    <button type="button" class="btn btn-primary" onclick="loadWFS()">Load WFS Data</button>
-</div>
+- ['get', 'operator_id'] : Récupère la valeur de operator_id pour chaque entité.
+- Chaque paire valeur, couleur affecte une couleur aux polygones ayant cette valeur.
+- Couleur de fallback #000000 si operator_id n’est pas dans la liste.
+
+### Résultat attendu
+- Chaque polygone dans la carte sera coloré en fonction de son operator_id.
+- La couleur sera aléatoire à chaque exécution de l’application.
+- Une valeur operator_id inconnue recevra la couleur noire (#000000).
+
+![alt text](images/image-8.png)
+
+### 7. Ajouter des étiquettes aux polygones
+
+Dans la fonction `handleFileSelect` (ligne 32) injectez le morceau de code suivant à la fin (après la méthode map.addLayer()) pour permettre l'ajout d'un nouveau layer d'étiquettes à vos polygones de garages :
+
+```
+map.addLayer({
+  'id': 'geojson-label',
+  'type': 'symbol',
+  'source': 'geojson-source',
+  'layout': {
+    'text-field': ['get', 'operator_id'],
+  },
+  'paint': {
+    'text-color': '#202',
+    'text-halo-color': '#fff',
+    'text-halo-width': 2
+  }
+})
 ```
 
-![alt text](images/image-18.png)
+### Rechargez et testez.
+![alt text](images/image-10.png)
+![alt text](images/image-9.png)
 
-Rechargez la page et cliquez sur le bouton pour afficher la couche WFS.
+## 8.  Versionnement avec GitHub
 
-![alt text](image-8.png)
+Vérifiez les fichiers modifiés :
 
----
+`git status`
 
-Vous pouvez ajouter cette propriété au layer WFS pour qu'il se loge hierarchiquement en dessous du layer des quartiers.
+Ajoutez-les à la mise en attente :
 
-        'before': 'qt_arbres_quartier' // This ensures that 'arrondissements' is placed beneath 'qt_arbres_quartier'
+`git add .`
 
-### **Conclusion**
+Faites un commit :
 
-Vous avez maintenant une configuration fonctionnelle de pg_tileserv et pg_featureserv avec des services VTS et WFS intégrés à une application MapLibreGL. La semaine prochaine, nous aborderons :
+git commit -m "Mise à jour du Laboratoire 9"
 
-- Les filtres dynamiques
-- Le déplacement automatisé
-- Les événements de souris (popup et interactions avancées)
-- La visualisation avancée
+Poussez vos changements :
 
+git push origin votre_nom-labo9
+
+🏆 Félicitations !
+
+Vous avez complété ce laboratoire avec succès ! 🚀
