@@ -7,35 +7,25 @@ var map = new maplibregl.Map({
     hash: true // activation du hash pour la gestion de l'historique de la carte
 });
 
-function loadTeam(teamName) {
-    // Vider toutes les divs
-    ['Equipe1', 'Equipe2', 'Equipe3', 'Equipe4', 'Equipe5'].forEach(id => {
-      document.getElementById(id).innerHTML = '';
-    });
-  
-    const path = teamName === 'Accueil'
-      ? './index.html'
-      : `./equipes/${teamName}/index.html`;
-  
-    fetch(path)
-      .then(response => {
-        if (!response.ok) throw new Error('Network response was not ok');
-        return response.text();
-      })
-      .then(data => {
-        document.getElementById(teamName).innerHTML = data;
-  
-        // Charger le JS uniquement si le fichier existe (ex: pour Équipe1 seulement)
-        if (teamName === 'Equipe1') {
-          const script = document.createElement('script');
-          script.src = `./equipes/${teamName}/app.js`;
-          script.type = 'text/javascript';
-          script.defer = true;
-          document.body.appendChild(script);
-        }
-      })
-      .catch(error => {
-        console.error('Erreur lors du chargement :', error);
-      });
-  }
-  
+// Variable pour stocker les couches de visualisation
+var myLayers = ['rdp', 'buffer', 'union', 'joined', 'grid', 'clusters', 'unclustered-point', 'heatmap', 'extrusion', 'cluster-count'];
+var registeredLayerIds = {};
+
+function updateFeatureCountOnMove() {
+    if (typeof featureCount === 'function') {
+        console.log('Calling featureCount() from map moveend event');
+        featureCount();
+    } else {
+        console.warn('featureCount function not available in map moveend event');
+    }
+}
+
+map.on('load', function() {
+    map.on('moveend', updateFeatureCountOnMove);
+    updateFeatureCountOnMove();
+});
+
+// Ajouter les event listeners pour les boutons de visualisation avancée
+document.getElementById('generateClusters').addEventListener('click', generateClusters);
+document.getElementById('generateHeatmap').addEventListener('click', generateHeatmap);
+document.getElementById('generateExtrusion').addEventListener('click', generateExtrusion);

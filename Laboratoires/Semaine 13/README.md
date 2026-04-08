@@ -1,16 +1,10 @@
-# Laboratoire cours 11-12
+# Laboratoire 13
 
-[**Laboratoire cours 11-12 ****1**](https://docs.google.com/document/d/1RMvJ2OjrlZe3YlsK7rlI5QAY4Ld-JLKV9fnR-8O9oAQ/edit#heading=h.6xp8lo9ezpif)
+[**Créer et styliser des clusters ]
 
-[**Prérequis : ****1**](https://docs.google.com/document/d/1RMvJ2OjrlZe3YlsK7rlI5QAY4Ld-JLKV9fnR-8O9oAQ/edit#heading=h.ow87l5ef1vz6)
+[**Créer et styliser une carte de chaleur (heatmap) ]
 
-[Objectif du laboratoire 6](https://docs.google.com/document/d/1RMvJ2OjrlZe3YlsK7rlI5QAY4Ld-JLKV9fnR-8O9oAQ/edit#heading=h.s1d1cfdc34oi)
-
-[**Créer et styliser des clusters ****7**](https://docs.google.com/document/d/1RMvJ2OjrlZe3YlsK7rlI5QAY4Ld-JLKV9fnR-8O9oAQ/edit#heading=h.86zhcmbby4fa)
-
-[**Créer et styliser une carte de chaleur (heatmap) ****9**](https://docs.google.com/document/d/1RMvJ2OjrlZe3YlsK7rlI5QAY4Ld-JLKV9fnR-8O9oAQ/edit#heading=h.t1qmum80efu0)
-
-[Créer et visualiser une couche de polygones extrudées 10](https://docs.google.com/document/d/1RMvJ2OjrlZe3YlsK7rlI5QAY4Ld-JLKV9fnR-8O9oAQ/edit#heading=h.jpcosgmr1kuw)
+[Créer et visualiser une couche de polygones extrudées]
 
 
 ##
@@ -25,7 +19,7 @@
 
 ![](https://lh7-us.googleusercontent.com/9hrK7pezwX-pzGLmZk1KeKrhZUb_SgBHdQHds4rMzoltbJVQ6efTsd_e2F9sfO2lJfS7KWsU0oe3WQMkTM81GydJ7ptuw4tGbQ24uHfYUjF-SErZkCS6DURfQLVDUGoRqSZ4yxyCnfj-yNXoDthbCY4)
 
-- Placez vous sur la branche “lab11”
+- Placez vous sur la branche “lab13”
 
 Pour vérifier sur quelle branche vous êtes : 
 
@@ -64,96 +58,106 @@ Vérifier que vous avez accès à la page web de l’Atlas en vous assurant que 
 Cela devrait ouvrir un nouvel onglet avec l’atlas
 
 
-## ![](https://lh7-us.googleusercontent.com/lU4mGX-EZ3Y-9pULQMf-X5i5GjRkPtD2JyYSagmeedqAPhLPNOqms6lRCpuCI_nt6zT5T7MOudo6hc7imIeteGkP0ye2uDKoTnqRMW4S5IAtV2Zg0Q23O-7LcfUecJTatwPiwvZfcJFkVMZZx256ENQ)
+![alt text](image.png)
 
 ### Objectif du laboratoire
 
-Ici le but du laboratoire est de vous familiariser avec les outils de développement (VS Code) et l’API Maplibre pour injecter des modules javascript de visualisation et de contrôle avancés de cartographie web. Avec les 2 derniers laboratoires vous avez donc pris en main ces outils, ici je ne fournirais pas de tutoriel exhaustif mais plutôt les grandes lignes des choses à faire pour que vous puissiez tester vous même votre montée en compétence.
+Ce laboratoire a pour objectif de vous faire pratiquer l'architecture d'une application web cartographique avec MapLibre GL.
 
+Vous allez apprendre à :
 
-###
+- structurer le code en modules JavaScript séparés,
+- charger une source GeoJSON et ajouter des couches MapLibre,
+- créer des visualisations de clusters, de heatmap et d'extrusion 3D,
+- connecter vos modules à la page `index.html` et à des boutons d'interface.
 
-## Créer et styliser des clusters
+Cette page n'est pas un tutoriel étape par étape. Elle donne les grandes lignes et les éléments essentiels à implémenter pour tester votre montée en compétence.
 
-Documentation : [Create and style clusters](https://maplibre.org/maplibre-gl-js/docs/examples/cluster/)
+Pour réussir ce laboratoire, procédez par étapes :
 
-1. Créez un nouveau module javascript \`renderClusters.js\` à la racine du dossier lab 11 
+1. Créez un module distinct pour chaque visualisation.
+2. Ajoutez les scripts correspondants dans `index.html`.
+3. Vérifiez que les sources et les couches sont correctement déclarées.
+4. Testez chaque fonction dans le navigateur et corrigez les erreurs.
 
-2. Dans ce module ajoutez une nouvelle fonction :
+## Exercices du laboratoire
 
-   1.  **\`function generateClusters() {}\`**
+Le dossier `Atlas/app/lab13/exercices` contient trois exercices et leurs solutions :
 
-3. Dans la fonction commencez par nettoyer les layers existants avec la fonctionnalité vu en classe : 
+- `exercice1_Clusters.js`
+- `exercice2_Extrusion.js`
+- `exercice3_Heatmap.js`
+- `SOLUTION_exercice1_Clusters.js`
+- `SOLUTION_exercice2_Extrusion.js`
+- `SOLUTION_exercice3_Heatmap.js`
 
-   1. **\`removeAllLayersAndSources()\`**
+Chaque fichier d’exercice contient des `TODO` à compléter. Les solutions sont fournies pour vérification.
 
-4. Dans le module renderClusters.js  ajoutez une nouvelle source geojson qui comprend la propriété **\`CLUSTER:TRUE\`** comme dans la documentation maplibre ci haut.
+### Exercice 1 : Clusters
+![alt text](image-1.png)
+Ouvrez `Atlas/app/lab13/exercices/exercice1_Clusters.js` et complétez les TODOs pour :
 
-5. La propriété **\`data\`** dans la configuration **addLayer** doit référer à la variable **\`randomPoints\`** du module javascript **\`randomPoints.js\`**
+- configurer la source `clusters-source`
+- activer le clustering sur `randomPoints`
+- définir les styles `circle-color` et `circle-radius`
+- styliser les points non clusterisés
 
-   1. ****![](https://lh7-us.googleusercontent.com/FC-rGQJjcQTuyxNlZmdXhpUqpdoLo4-trMKfNU-6y1unzoOjY1T_9UsLFaNmft5SJce5W4mkhk_KdR8s0OKIqyOVR1I09NWJQqj5XCz3uUteLEao2UpPtty1TxhAYhpMUEKEFSYTZk-HZDh9ROSsZfo)****
+Ce travail permet de comprendre :
 
-6. Une fois terminé, ajoutez l’écouteur d'événement pour exécuter cette fonction lors du clic sur le bouton comme vu en classe
+- l’ajout d’une source GeoJSON
+- le clustering MapLibre
+- l’utilisation des expressions `step`
+- les filtres `['has', 'point_count']` et `['!', ['has', 'point_count']]`
 
-   1. document
+### Exercice 2 : Extrusion 3D+
 
-   2.   .getElementById('generateClusters') // id unique du bouton
+![alt text](image-3.png)
 
-   3.   .addEventListener('click', generateClusters); // ajoute un event de type click qui lance la fonction generateClusters()
+Ouvrez `Atlas/app/lab13/exercices/exercice2_Extrusion.js` et complétez les TODOs pour :
 
-   4.
+- utiliser la source `union-source`
+- appliquer `fill-extrusion-color`
+- construire une interpolation de zoom pour `fill-extrusion-height`
+- construire une interpolation de zoom pour `fill-extrusion-base`
+- régler `fill-extrusion-opacity`
 
-7. Le **\<button>** id du bouton se nomme : **\`'generateClusters'\`**
+Ce travail permet de comprendre :
 
-8. N’oubliez pas d’ajouter la source du module javascript dans le fichier html **index.html**
-   9. Emplacement du module à mettre dans le fichier html : ./modules/lab11/renderClusters.js
+- l’utilisation d’une source fusionnée
+- la création d’un effet 2.5D avec `interpolate`
+- la liaison entre propriétés de données et styles MapLibre
 
-![](https://lh7-us.googleusercontent.com/XOeK_u2rykBVa4gQSGvliXKpbRWz695z-T81T2FgvRd9qV_Rkc7wajqH_yx5h3qHEvhbMsLqY0rIylA00AjZ8T4UnUh1CwechKCDL1w5YMgkAJQczrGkNkw9PXAkiy01MdF__LukvHv9uQFhGQyB-_g)
+### Exercice 3 : Heatmap
 
+![alt text](image-2.png)
 
-##
+Ouvrez `Atlas/app/lab13/exercices/exercice3_Heatmap.js` et complétez les TODOs pour :
 
-## Créer et styliser une carte de chaleur (heatmap)
+- ajouter la source `heatmap-source`
+- configurer `heatmap-weight`, `heatmap-intensity`, `heatmap-color`, `heatmap-radius` et `heatmap-opacity`
+- utiliser `['heatmap-density']` pour le dégradé de couleur
+- définir un dégradé froid->chaud
 
-Documentation : [Create a heatmap layer - MapLibre GL JS](https://maplibre.org/maplibre-gl-js/docs/examples/heatmap-layer/)
+Ce travail permet de comprendre :
 
-1. Créez un nouveau module javascript **\`renderHeatmap.js\`**
+- la création d’une couche `heatmap`
+- les expressions `interpolate` sur `zoom` et `heatmap-density`
+- les ajustements de rendu par densité
 
-2. Ajoutez une source et un layer de type **heatmap**, suivez l’exemple Maplibre
+### Vérification
 
-3. La propriété **\`data\`** dans la configuration **addLayer** doit référer à la variable **\`randomPoints\`** du module javascript **\`randomPoints.js\`**
+Comparez votre code avec les fichiers solution :
 
-4. N’oubliez pas d’ajouter la **source du module** dans le index.html
+- `SOLUTION_exercice1_Clusters.js`
+- `SOLUTION_exercice2_Extrusion.js`
+- `SOLUTION_exercice3_Heatmap.js`
 
-![](https://lh7-us.googleusercontent.com/XA4o1TyKks1QbXwoQP6pu8suTiNjoY5Edqy5YqcnU5b30xp4XALceX1mkAvn1C5XILda1TqzzCWEtg3g6OmaMuWADm_eizsM1cajhFLsvshLtPGG4wNlB7SZYPdOU9QusLvOUGsJKtCH9-nL5oss4Yk)
+Ces solutions permettent de valider vos réponses et de comprendre les bonnes pratiques.
 
+### Pratique recommandée
 
-## Créer et visualiser une couche de polygones extrudées
+- Travaillez exercice par exercice.
+- Ne modifiez pas les noms de sources ou de couches sans raison.
+- Vérifiez chaque erreur dans la console du navigateur.
 
-Documentation : [Display buildings in 3D - MapLibre GL JS](https://maplibre.org/maplibre-gl-js/docs/examples/3d-buildings/)
-
-1. Créez un nouveau module javascript **\`render3D.js\`**
-
-2. Créez une fonction **\`function generate3D()\`**
-
-3. Ajoutez y une variable pour fabriquer un grid hexagonal : 
-
-   1. **var grid = makeGrid();** 
-
-   2. Cette **variable** appelle une fonction du module javascript dans le fichier **\`createGrid.js\`** vous pouvez aller la voir si vous êtes curieux
-
-4. Ajoutez une source de type geojson dont le data est **\`grid\`** 
-
-   1. (qui réfère à la variable précédente)
-
-5.  Maintenant ajouter un layer de type **\`fill-extrusion\`**
-
-   1. Inspirez vous de l’exemple Maplibre ci-haut
-
-6. La propriété **\`fill-extrusion-color\`** et **\`fill-extrusion-height\`** que vous devez utiliser est “randomValue” (qui est générée par le module createGrid.js)
-
-7. N’oubliez pas d’ajouter la **source du module** dans index.html
-
-![](https://lh7-us.googleusercontent.com/C2eWrfMpdF6d0-NZFXOPLMzonCksaDJy3-FQE21wR14rxzSbCyyybBimODm_ISDtt0wIpZA-6juKeFkt-47rQ9eWZ3t6fIagy2z3mQDH_StZdunzA7uqAANUiFaCeha_xS661JxWlokuGNclTItnfl4)
-
-Beau travail ! Vous venez de réaliser votre première application d’analyse spatiale sur le Web ! 💪
+Beau travail ! Vous êtes maintenant en train de faire des exercices alignés avec les fichiers présents dans `app/lab13/exercices`. 💪
