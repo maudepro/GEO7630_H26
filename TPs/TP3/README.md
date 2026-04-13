@@ -50,16 +50,6 @@ Votre application doit inclure :
 
 ---
 
-### **3. Présentation**
-Votre présentation doit inclure :
-1. **Vulgarisation du traitement des données** :
-   - Explication simple et accessible de vos processus de traitement.
-2. **Présentation interactive de l’application** :
-   - Démonstration des fonctionnalités principales et de l’interface.
-   - Option : Une **vidéo pré-enregistrée** peut être soumise.
-
----
-
 ### **4. Documentation du projet**
 Un fichier **README.md** dans votre répertoire **TP3/** doit contenir :
 1. **Description du projet** :
