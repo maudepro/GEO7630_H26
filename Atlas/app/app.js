@@ -20,7 +20,11 @@ function updateFeatureCountOnMove() {
     }
 }
 
+//Une fois que la carte est chargée, on ajoute les points aléatoires et on met à jour le compteur de features à chaque déplacement de la carte
 map.on('load', function() {
+    addRandomPointsToMap(map);
+    //J'ajoute ma fonction pour ajouter la première fonction que j'ai crée dans classModules/addVectorTile
+    addVectorTileLayer(map)
     map.on('moveend', updateFeatureCountOnMove);
     updateFeatureCountOnMove();
 });
